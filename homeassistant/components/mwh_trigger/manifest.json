@@ -1,0 +1,14 @@
+{
+  "domain": "mwh_trigger",
+  "name": "MWH Trigger Test",
+  "config_flow": true,
+  "documentation": "https://www.home-assistant.io/integrations/mwh_trigger",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": [],
+  "homekit": {},
+  "dependencies": [],
+  "codeowners": [
+    "@markwhibbard"
+  ]
+}

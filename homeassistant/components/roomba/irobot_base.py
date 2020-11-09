@@ -1,6 +1,7 @@
 """Base class for iRobot devices."""
 import asyncio
 import logging
+import time
 
 from homeassistant.components.vacuum import (
     ATTR_STATUS,
@@ -136,10 +137,15 @@ class IRobotEntity(Entity):
 class IRobotVacuum(IRobotEntity, StateVacuumEntity):
     """Base class for iRobot robots."""
 
+    should_poll = True
+
     def __init__(self, roomba, blid):
         """Initialize the iRobot handler."""
         super().__init__(roomba, blid)
         self._cap_position = self.vacuum_state.get("cap", {}).get("pose") == 1
+        self._last_cleaning_time = 0
+        self._last_cleaned_area = 0 
+        self._last_connect_timestamp = 0
 
     @property
     def supported_features(self):
@@ -180,18 +186,20 @@ class IRobotVacuum(IRobotEntity, StateVacuumEntity):
         # Set legacy status to avoid break changes
         state_attrs[ATTR_STATUS] = self.vacuum.current_state
 
+        state_attrs['last_connected_at'] = self._last_connect_timestamp
+
         # Only add cleaning time and cleaned area attrs when the vacuum is
         # currently on
         if self.state == STATE_CLEANING:
             # Get clean mission status
             mission_state = state.get("cleanMissionStatus", {})
-            cleaning_time = mission_state.get("mssnM")
-            cleaned_area = mission_state.get("sqft")  # Imperial
+            self._last_cleaning_time = mission_state.get("mssnM")
+            self._last_cleaned_area = mission_state.get("sqft")  # Imperial
             # Convert to m2 if the unit_system is set to metric
-            if cleaned_area and self.hass.config.units.is_metric:
-                cleaned_area = round(cleaned_area * 0.0929)
-            state_attrs[ATTR_CLEANING_TIME] = cleaning_time
-            state_attrs[ATTR_CLEANED_AREA] = cleaned_area
+            if self._last_cleaned_area and self.hass.config.units.is_metric:
+                self._last_cleaned_area = round(self._last_cleaned_area * 0.0929)
+        state_attrs[ATTR_CLEANING_TIME] = self._last_cleaning_time
+        state_attrs[ATTR_CLEANED_AREA] = self._last_cleaned_area
 
         # Error
         if self.vacuum.error_code != 0:
@@ -254,3 +262,16 @@ class IRobotVacuum(IRobotEntity, StateVacuumEntity):
         await self.hass.async_add_executor_job(
             self.vacuum.send_command, command, params
         )
+
+    def update(self):
+        if self.vacuum.roomba_connected:
+            self._last_connect_timestamp = time.time()
+        else:
+            if time.time() - self._last_connect_timestamp > 20:
+                _LOGGER.error("Timeout on connection... attempting to reconnect...")
+                print("Attempting to reconnect")
+                try:
+                    roomba.connect()
+                except RoombaConnectionError as err:
+                    _LOGGER.error("Error to connect to vacuum")
+                    print("Could not connect")

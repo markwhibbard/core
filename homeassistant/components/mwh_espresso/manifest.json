@@ -1,0 +1,11 @@
+{
+  "domain": "mwh_espresso",
+  "name": "MWH Espresso machine",
+  "config_flow": true,
+  "documentation": "https://www.markhibbard.com/dummy.html",
+  "requirements": [],
+  "dependencies": ["mqtt"],
+  "codeowners": [
+    "@markwhibbard"
+  ]
+}

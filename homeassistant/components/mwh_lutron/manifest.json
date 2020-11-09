@@ -1,0 +1,11 @@
+{
+  "domain": "mwh_lutron",
+  "name": "MWH Lutron Component",
+  "config_flow": true,
+  "documentation": "https://www.markhibbard.com/dummy.html",
+  "requirements": [],
+  "dependencies": ["mqtt"],
+  "codeowners": [
+    "@markwhibbard"
+  ]
+}

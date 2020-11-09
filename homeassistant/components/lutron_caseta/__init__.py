@@ -33,7 +33,9 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-LUTRON_CASETA_COMPONENTS = ["light", "switch", "cover", "scene", "fan", "binary_sensor"]
+#LUTRON_CASETA_COMPONENTS = ["light", "switch", "cover", "scene", "fan", "binary_sensor"]
+#MWH EDIT: remove reference to scene to not conflict with my shit.
+LUTRON_CASETA_COMPONENTS = ["light", "switch", "cover", "fan", "binary_sensor"]
 
 
 async def async_setup(hass, base_config):
