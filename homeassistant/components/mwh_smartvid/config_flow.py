@@ -4,14 +4,14 @@ import logging
 import voluptuous as vol
 
 from homeassistant import config_entries, core, exceptions
-
-from .const import DOMAIN  # pylint:disable=unused-import
-from .const import CONF_TOPIC
 from homeassistant.const import CONF_NAME
+
+from .const import CONF_TOPIC
+from .const import DOMAIN  # pylint:disable=unused-import
 
 DEFAULT_NAME = "MWH SmartVid"
 DEFAULT_TOPIC = "hooking/smartvid"
-#from .hub import Hub
+# from .hub import Hub
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,14 +46,14 @@ async def validate_input(hass: core.HomeAssistant, data: dict):
     if len(data["topic"]) < 3:
         raise InvalidTopic
 
-#    hub = Hub(hass, data["host"])
+    #    hub = Hub(hass, data["host"])
     # The dummy hub provides a `test_connection` method to ensure it's working
     # as expected
-#    result = await hub.test_connection()
-#    if not result:
-        # If there is an error, raise an exception to notify HA that there was a
-        # problem. The UI will also show there was a problem
-#        raise CannotConnect
+    #    result = await hub.test_connection()
+    #    if not result:
+    # If there is an error, raise an exception to notify HA that there was a
+    # problem. The UI will also show there was a problem
+    #        raise CannotConnect
 
     # If your PyPI package is not built with async, pass your methods
     # to the executor:

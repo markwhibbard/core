@@ -1,22 +1,23 @@
 """Support for the MWH Espresso"""
-import logging
 import asyncio
+import logging
 
-#from pyoppleio.OppleLightDevice import OppleLightDevice
+# from pyoppleio.OppleLightDevice import OppleLightDevice
 import voluptuous as vol
 
-from homeassistant.helpers.entity import Entity
 from homeassistant.const import CONF_NAME, DEVICE_CLASS_BATTERY
-from .const import DOMAIN
-from . import hub
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.entity import Entity
+
+from . import hub
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, config, async_add_entities)->None:
+async def async_setup_entry(hass, config, async_add_entities) -> None:
     """Set up MWH Espresso platform"""
-    hub = hass.data[DOMAIN][config.entry_id] 
+    hub = hass.data[DOMAIN][config.entry_id]
     newdevices = []
     for device in hub.devices:
         newdevices.append(EspressoTank(device))
@@ -24,10 +25,8 @@ async def async_setup_entry(hass, config, async_add_entities)->None:
     async_add_entities(newdevices)
 
 
-
 class EspressoTank(Entity):
     """MWH Espresso Tank"""
-
 
     should_poll = False
 
@@ -54,16 +53,18 @@ class EspressoTank(Entity):
     @property
     def unique_id(self):
         return self._device.uid + "_sensor"
-    
+
     @property
     def unit_of_measurement(self):
         return "%"
-   
+
     @property
     def device_state_attributes(self):
         """Return the state attributes of the device."""
-        attr = {'last_shot': self._device.shottimestamp,
-                'shot_timer': self._device.shottimer}
+        attr = {
+            "last_shot": self._device.shottimestamp,
+            "shot_timer": self._device.shottimer,
+        }
         return attr
 
     @property
@@ -79,7 +80,6 @@ class EspressoTank(Entity):
     def name(self):
         """Return the display name of this light."""
         return self._device.name + " Tank Level"
-
 
     @property
     def state(self):

@@ -1,19 +1,20 @@
-import logging
 import asyncio
+import logging
 
 import voluptuous as vol
 
-from homeassistant.helpers.entity import Entity
 from homeassistant.const import CONF_NAME
-from .const import DOMAIN
-from . import hub
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.entity import Entity
+
+from . import hub
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, config, async_add_entities)->None:
-    hub = hass.data[DOMAIN][config.entry_id] 
+async def async_setup_entry(hass, config, async_add_entities) -> None:
+    hub = hass.data[DOMAIN][config.entry_id]
     newdevices = []
     for device in hub._picos:
         newdevices.append(LutronPicoEntity(device))
@@ -21,13 +22,10 @@ async def async_setup_entry(hass, config, async_add_entities)->None:
     async_add_entities(newdevices)
 
 
-
 class LutronPicoEntity(Entity):
     """MWH Espresso Tank"""
 
-
     should_poll = False
-
 
     def __init__(self, device):
         self._device = device
@@ -50,7 +48,7 @@ class LutronPicoEntity(Entity):
     @property
     def unique_id(self):
         return self._device.entity_id
-   
+
     @property
     def device_state_attributes(self):
         return self._device.device_state_attributes

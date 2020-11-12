@@ -1,22 +1,23 @@
 """Support for the MWH Espresso"""
-import logging
 import asyncio
+import logging
 
-#from pyoppleio.OppleLightDevice import OppleLightDevice
+# from pyoppleio.OppleLightDevice import OppleLightDevice
 import voluptuous as vol
 
-from homeassistant.helpers.entity import Entity
 from homeassistant.const import CONF_NAME
-from .const import DOMAIN
-from . import hub
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.entity import Entity
+
+from . import hub
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, config, async_add_entities)->None:
+async def async_setup_entry(hass, config, async_add_entities) -> None:
     """Set up MWH Espresso platform"""
-    hub = hass.data[DOMAIN][config.entry_id] 
+    hub = hass.data[DOMAIN][config.entry_id]
     newdevices = []
     for device in hub.devices:
         newdevices.append(SmartVidDetect(device))
@@ -24,13 +25,10 @@ async def async_setup_entry(hass, config, async_add_entities)->None:
     async_add_entities(newdevices)
 
 
-
 class SmartVidDetect(Entity):
     """MWH Espresso Tank"""
 
-
     should_poll = False
-
 
     def __init__(self, device):
         self._device = device
@@ -53,15 +51,16 @@ class SmartVidDetect(Entity):
     @property
     def unique_id(self):
         return self._device.uid + "_detect"
-   
+
     @property
     def device_state_attributes(self):
         """Return the state attributes of the device."""
-        attr = {'motion': (self._device.alertvalue > 0),
-                'alert': self._device.alertvalue,
-                'face_detected': self._device.facedetected,
-                'name': self._device.facename
-                }
+        attr = {
+            "motion": (self._device.alertvalue > 0),
+            "alert": self._device.alertvalue,
+            "face_detected": self._device.facedetected,
+            "name": self._device.facename,
+        }
         return attr
 
     @property
@@ -77,7 +76,6 @@ class SmartVidDetect(Entity):
     def name(self):
         """Return the display name of this light."""
         return self._device.name + " camera"
-
 
     @property
     def state(self):

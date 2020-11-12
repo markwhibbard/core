@@ -144,7 +144,7 @@ class IRobotVacuum(IRobotEntity, StateVacuumEntity):
         super().__init__(roomba, blid)
         self._cap_position = self.vacuum_state.get("cap", {}).get("pose") == 1
         self._last_cleaning_time = 0
-        self._last_cleaned_area = 0 
+        self._last_cleaned_area = 0
         self._last_connect_timestamp = 0
 
     @property
@@ -186,7 +186,7 @@ class IRobotVacuum(IRobotEntity, StateVacuumEntity):
         # Set legacy status to avoid break changes
         state_attrs[ATTR_STATUS] = self.vacuum.current_state
 
-        state_attrs['last_connected_at'] = self._last_connect_timestamp
+        state_attrs["last_connected_at"] = self._last_connect_timestamp
 
         # Only add cleaning time and cleaned area attrs when the vacuum is
         # currently on

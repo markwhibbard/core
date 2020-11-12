@@ -1,8 +1,8 @@
 """The tests for MWH Trigger Test device triggers."""
 import pytest
 
-from homeassistant.components.mwh_trigger import DOMAIN
 import homeassistant.components.automation as automation
+from homeassistant.components.mwh_trigger import DOMAIN
 from homeassistant.const import STATE_OFF, STATE_ON
 from homeassistant.helpers import device_registry
 from homeassistant.setup import async_setup_component

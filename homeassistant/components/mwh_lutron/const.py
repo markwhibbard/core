@@ -1,2 +1,2 @@
-DOMAIN="mwh_lutron"
-CONF_TOPIC = 'topic'
+DOMAIN = "mwh_lutron"
+CONF_TOPIC = "topic"

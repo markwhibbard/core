@@ -1,54 +1,49 @@
 import asyncio
-import random
-import time
 from datetime import datetime
 import json
+import random
+import time
 
 
 class EspressoHub:
-
     def __init__(self, hass, topic):
-        self._name = topic  #TODO is this what I want?
+        self._name = topic  # TODO is this what I want?
         self._topic = topic
         self._hass = hass
-        #self._id = host.lower()  #figure this out later
+        # self._id = host.lower()  #figure this out later
 
     def turnon(self, uid):
-        #TODO use uid to turn on specific unit
-        self._hass.components.mqtt.async_publish(self._topic + '/turnon', None)
+        # TODO use uid to turn on specific unit
+        self._hass.components.mqtt.async_publish(self._topic + "/turnon", None)
 
     def turnoff(self, uid):
-        #TODO use uid to turn on specific unit
-        self._hass.components.mqtt.async_publish(self._topic + '/turnoff', None)
-
+        # TODO use uid to turn on specific unit
+        self._hass.components.mqtt.async_publish(self._topic + "/turnoff", None)
 
     async def discover(self):
-        
-        self.devices = [
-            EspressoDevice('mwh_espresso', 'Espresso Machine', self)
-        ]
-        #TODO ask for refresh from all devices
+
+        self.devices = [EspressoDevice("mwh_espresso", "Espresso Machine", self)]
+        # TODO ask for refresh from all devices
         self.refresh()
         return True
 
     def refresh(self):
-        self._hass.components.mqtt.async_publish(self._topic+'/refresh', None)
+        self._hass.components.mqtt.async_publish(self._topic + "/refresh", None)
 
-    #TODO make async
+    # TODO make async
     async def connect(self):
-
 
         # Listen to a message on MQTT.
         def message_received(topic, payload, qos):
-            #TODO parse topic for device id
-            uid='mwh_espresso'
-            thisdevice=None
+            # TODO parse topic for device id
+            uid = "mwh_espresso"
+            thisdevice = None
             for device in self.devices:
-                if device.uid==uid:
-                    thisdevice=device
+                if device.uid == uid:
+                    thisdevice = device
             if thisdevice is None:
-                print("Error in mwh hub: didn't find device with uid {} loaded".format(uid))
-                return 
+                print(f"Error in mwh hub: didn't find device with uid {uid} loaded")
+                return
 
             """A new MQTT message has been received."""
             if topic == self._topic + "/status":
@@ -56,29 +51,30 @@ class EspressoHub:
                     print("Error in espresso sensor: No arguments in received status")
                 else:
                     args = json.loads(payload)
-                    if 'tank' in args:
-                        thisdevice._tanklevel = args['tank']
-                    if 'switch' in args:
-                        synced = args['switch']
+                    if "tank" in args:
+                        thisdevice._tanklevel = args["tank"]
+                    if "switch" in args:
+                        synced = args["switch"]
                         if synced:
                             thisdevice._is_on = True
                         else:
                             thisdevice._is_on = False
-                    if 'shot' in args:
-                        if args['shot']:
-                            thisdevice._shottimestamp = datetime.now().strftime("%Y.%m.%d %H:%M:%S")
-                            thisdevice._shottimer = args['shottime']
+                    if "shot" in args:
+                        if args["shot"]:
+                            thisdevice._shottimestamp = datetime.now().strftime(
+                                "%Y.%m.%d %H:%M:%S"
+                            )
+                            thisdevice._shottimer = args["shottime"]
                     thisdevice.publish_updates()
-            
-        await self._hass.components.mqtt.async_subscribe(self._topic + "/#", message_received)
+
+        await self._hass.components.mqtt.async_subscribe(
+            self._topic + "/#", message_received
+        )
         self._is_connected = True
         return True
 
 
-
-
 class EspressoDevice:
-
     def __init__(self, uid, name, hub):
         """Init dummy roller."""
         self._uid = uid
@@ -144,7 +140,7 @@ class EspressoDevice:
 
     # In a real implementation, this library would call it's call backs when it was
     # notified of any state changeds for the relevant device.
-    def publish_updates(self)->None:
+    def publish_updates(self) -> None:
         """Schedule call all registered callbacks."""
         for callback in self._callbacks:
             callback()

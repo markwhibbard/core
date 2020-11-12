@@ -1,1 +1,1 @@
-DOMAIN="mwh_sonos"
+DOMAIN = "mwh_sonos"

@@ -1,25 +1,24 @@
 """Support for the MWH Espresso"""
-import logging
 import asyncio
+import logging
 
-#from pyoppleio.OppleLightDevice import OppleLightDevice
+# from pyoppleio.OppleLightDevice import OppleLightDevice
 import voluptuous as vol
-from homeassistant.components import mqtt
 
-from homeassistant.components.switch import (
-    PLATFORM_SCHEMA,
-    SwitchEntity,
-)
+from homeassistant.components import mqtt
+from homeassistant.components.switch import PLATFORM_SCHEMA, SwitchEntity
 from homeassistant.const import CONF_NAME
-from .const import DOMAIN
-from . import hub
 import homeassistant.helpers.config_validation as cv
+
+from . import hub
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup_entry(hass, config, async_add_entities)->None:
+
+async def async_setup_entry(hass, config, async_add_entities) -> None:
     """Set up MWH Espresso platform"""
-    hub = hass.data[DOMAIN][config.entry_id] 
+    hub = hass.data[DOMAIN][config.entry_id]
     newdevices = []
     for device in hub.devices:
         newdevices.append(EspressoSwitch(device))
@@ -27,10 +26,8 @@ async def async_setup_entry(hass, config, async_add_entities)->None:
     async_add_entities(newdevices)
 
 
-
 class EspressoSwitch(SwitchEntity):
     """MWH Espresso Switch"""
-
 
     should_poll = False
 

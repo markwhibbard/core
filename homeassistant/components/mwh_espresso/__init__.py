@@ -26,11 +26,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Store an instance of the "connecting" class that does the work of speaking
     # with your actual devices.
     myhub = hub.EspressoHub(hass, entry.data[CONF_TOPIC])
-    
-    #TODO make this await
+
+    # TODO make this await
     await myhub.connect()
     await myhub.discover()
-    #TODO check that we connected and discovered devices
+    # TODO check that we connected and discovered devices
 
     hass.data[DOMAIN][entry.entry_id] = myhub
     # This creates each HA object for each platform your device requires.

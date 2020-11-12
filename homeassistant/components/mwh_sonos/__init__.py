@@ -4,7 +4,7 @@ import asyncio
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-#from . import hub
+# from . import hub
 from .const import DOMAIN
 
 # List of platforms to support. There should be a matching .py file for each,
@@ -26,7 +26,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Hello World from a config entry."""
     # Store an instance of the "connecting" class that does the work of speaking
     # with your actual devices.
-    #hass.data[DOMAIN][entry.entry_id] = hub.Hub(hass, entry.data["host"])
+    # hass.data[DOMAIN][entry.entry_id] = hub.Hub(hass, entry.data["host"])
 
     # This creates each HA object for each platform your device requires.
     # It's done by calling the `async_setup_entry` function in each platform module.

@@ -4,10 +4,11 @@ import logging
 import voluptuous as vol
 
 from homeassistant import config_entries, core, exceptions
-from homeassistant.const import (CONF_NAME, CONF_DOMAIN)
+from homeassistant.const import CONF_DOMAIN, CONF_NAME
 
 from .const import DOMAIN  # pylint:disable=unused-import
-#from .hub import Hub
+
+# from .hub import Hub
 
 DEFAULT_NAME = "SONOS Sync Switch"
 DEFAULT_TOPIC = "hooking/sonos"
@@ -29,7 +30,7 @@ DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_NAME, default=DEFAULT_NAME): str,
         vol.Required("topic", default=DEFAULT_TOPIC): str,
-        vol.Optional(CONF_DOMAIN): str
+        vol.Optional(CONF_DOMAIN): str,
     }
 )
 
@@ -46,14 +47,14 @@ async def validate_input(hass: core.HomeAssistant, data: dict):
     if len(data["topic"]) < 3:
         raise InvalidTopic
 
-#    hub = Hub(hass, data["host"])
+    #    hub = Hub(hass, data["host"])
     # The dummy hub provides a `test_connection` method to ensure it's working
     # as expected
-#    result = await hub.test_connection()
-#    if not result:
-        # If there is an error, raise an exception to notify HA that there was a
-        # problem. The UI will also show there was a problem
-#        raise CannotConnect
+    #    result = await hub.test_connection()
+    #    if not result:
+    # If there is an error, raise an exception to notify HA that there was a
+    # problem. The UI will also show there was a problem
+    #        raise CannotConnect
 
     # If your PyPI package is not built with async, pass your methods
     # to the executor:

@@ -25,12 +25,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Store an instance of the "connecting" class that does the work of speaking
     # with your actual devices.
     myhub = hub.SmartVidHub(hass, entry.data[CONF_TOPIC])
-    
+
     if not await myhub.connect():
         return True
     if not await myhub.discover():
         return True
-    #TODO check that we connected and discovered devices
+    # TODO check that we connected and discovered devices
 
     hass.data[DOMAIN][entry.entry_id] = myhub
     # This creates each HA object for each platform your device requires.

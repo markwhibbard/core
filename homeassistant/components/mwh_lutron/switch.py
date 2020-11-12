@@ -1,25 +1,25 @@
-import logging
 import asyncio
+import logging
 
 import voluptuous as vol
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.const import CONF_NAME
-from .const import DOMAIN
-from . import hub
 import homeassistant.helpers.config_validation as cv
+
+from . import hub
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, config, async_add_entities)->None:
-    hub = hass.data[DOMAIN][config.entry_id] 
+async def async_setup_entry(hass, config, async_add_entities) -> None:
+    hub = hass.data[DOMAIN][config.entry_id]
     newdevices = []
     for device in hub._scenes:
         newdevices.append(LutronSceneEntity(device))
 
     async_add_entities(newdevices)
-
 
 
 class LutronSceneEntity(SwitchEntity):
@@ -47,7 +47,7 @@ class LutronSceneEntity(SwitchEntity):
     @property
     def unique_id(self):
         return self._device.entity_id
-   
+
     @property
     def name(self):
         """Return the display name of this light."""
@@ -63,17 +63,13 @@ class LutronSceneEntity(SwitchEntity):
         """Return true if switch is on."""
         return self._device.is_on
 
-
     def turn_on(self, **kwargs):
         if self.available:
             self._device.turnon()
 
-
     def turn_off(self, **kwargs):
         if self.available:
             self._device.turnoff()
-
-
 
     def update(self):
         """Synchronize state with switch."""

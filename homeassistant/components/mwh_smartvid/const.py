@@ -1,2 +1,2 @@
-DOMAIN="mwh_smartvid"
-CONF_TOPIC = 'topic'
+DOMAIN = "mwh_smartvid"
+CONF_TOPIC = "topic"
