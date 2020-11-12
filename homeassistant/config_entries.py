@@ -828,10 +828,7 @@ class ConfigEntries:
                 return False
 
         integration = await loader.async_get_integration(self.hass, domain)
-        try:
-            await entry.async_setup(self.hass, integration=integration)
-        except:
-            print("MWH: Some setup error related to mwh_sonos?")
+        await entry.async_setup(self.hass, integration=integration)
         return True
 
     async def async_forward_entry_unload(self, entry: ConfigEntry, domain: str) -> bool:
