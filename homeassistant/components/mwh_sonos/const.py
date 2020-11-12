@@ -1,1 +1,0 @@
-DOMAIN = "mwh_sonos"
