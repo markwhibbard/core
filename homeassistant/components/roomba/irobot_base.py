@@ -59,6 +59,7 @@ STATE_MAP = {
     "run": STATE_CLEANING,
     "stop": STATE_IDLE,
     "stuck": STATE_ERROR,
+    "evac": STATE_CLEANING,
 }
 
 
