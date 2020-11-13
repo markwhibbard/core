@@ -385,12 +385,10 @@ class Camera(Entity):
 
     async def async_camera_image(self):
         """Return bytes of camera image."""
-        return None
         return await self.hass.async_add_executor_job(self.camera_image)
 
     async def handle_async_still_stream(self, request, interval):
         """Generate an HTTP MJPEG stream from camera images."""
-        return None
         return await async_get_still_stream(
             request, self.async_camera_image, self.content_type, interval
         )
