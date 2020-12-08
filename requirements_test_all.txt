@@ -171,7 +171,7 @@ arcam-fmj==0.5.3
 async-upnp-client==0.14.13
 
 # homeassistant.components.aurora
-auroranoaa==0.0.1
+auroranoaa==0.0.2
 
 # homeassistant.components.stream
 av==8.0.2
@@ -376,7 +376,7 @@ hangups==0.4.11
 hass-nabucasa==0.38.0
 
 # homeassistant.components.tasmota
-hatasmota==0.1.2
+hatasmota==0.1.4
 
 # homeassistant.components.jewish_calendar
 hdate==0.9.12
@@ -394,7 +394,7 @@ hole==0.5.1
 holidays==0.10.3
 
 # homeassistant.components.frontend
-home-assistant-frontend==20201202.0
+home-assistant-frontend==20201204.0
 
 # homeassistant.components.zwave
 homeassistant-pyozw==0.1.10
@@ -403,7 +403,7 @@ homeassistant-pyozw==0.1.10
 homeconnect==0.6.3
 
 # homeassistant.components.homematicip_cloud
-homematicip==0.12.1
+homematicip==0.13.0
 
 # homeassistant.components.google
 # homeassistant.components.remember_the_milk
@@ -419,7 +419,7 @@ hyperion-py==0.6.0
 iaqualink==0.3.4
 
 # homeassistant.components.ping
-icmplib==1.2.2
+icmplib==2.0
 
 # homeassistant.components.influxdb
 influxdb-client==1.8.0
@@ -782,7 +782,7 @@ pymodbus==2.3.0
 pymonoprice==0.3
 
 # homeassistant.components.myq
-pymyq==2.0.10
+pymyq==2.0.11
 
 # homeassistant.components.nut
 pynut2==2.1.2
@@ -833,6 +833,10 @@ pyrisco==0.3.1
 
 # homeassistant.components.ruckus_unleashed
 pyruckus==0.12
+
+# homeassistant.components.serial
+# homeassistant.components.zha
+pyserial-asyncio==0.4
 
 # homeassistant.components.acer_projector
 # homeassistant.components.zha
@@ -932,7 +936,7 @@ pywebpush==1.9.2
 pywilight==0.0.65
 
 # homeassistant.components.zerproc
-pyzerproc==0.2.5
+pyzerproc==0.3.0
 
 # homeassistant.components.rachio
 rachiopy==1.0.3
@@ -947,7 +951,7 @@ restrictedpython==5.0
 rflink==0.0.55
 
 # homeassistant.components.ring
-ring_doorbell==0.6.0
+ring_doorbell==0.6.2
 
 # homeassistant.components.roku
 rokuecp==0.6.0
@@ -984,7 +988,7 @@ sharkiqpy==0.1.8
 simplehound==0.3
 
 # homeassistant.components.simplisafe
-simplisafe-python==9.6.0
+simplisafe-python==9.6.2
 
 # homeassistant.components.slack
 slackclient==2.5.0
@@ -1140,7 +1144,7 @@ zeep[async]==4.0.0
 zeroconf==0.28.6
 
 # homeassistant.components.zha
-zha-quirks==0.0.47
+zha-quirks==0.0.48
 
 # homeassistant.components.zha
 zigpy-cc==0.5.2
@@ -1155,7 +1159,7 @@ zigpy-xbee==0.13.0
 zigpy-zigate==0.7.3
 
 # homeassistant.components.zha
-zigpy-znp==0.2.2
+zigpy-znp==0.3.0
 
 # homeassistant.components.zha
-zigpy==0.28.1
+zigpy==0.28.2
