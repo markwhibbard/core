@@ -2,6 +2,8 @@
 import asyncio
 import logging
 import time
+import json
+from roombaPic.roombaPic import draw_map, load_state_info
 
 from homeassistant.components.vacuum import (
     ATTR_STATUS,
@@ -144,8 +146,30 @@ class IRobotVacuum(IRobotEntity, StateVacuumEntity):
         """Initialize the iRobot handler."""
         super().__init__(roomba, blid)
         self._cap_position = self.vacuum_state.get("cap", {}).get("pose") == 1
-        self._last_cleaning_time = 0
-        self._last_cleaned_area = 0
+        
+        self.save_state = False
+        self.last_save = time.time()
+        self.draw_map = False
+        self.last_draw = time.time()
+        self.max_age = 5 * 12 * 3600
+        self.io_interval = 20
+        self.state_filename = "/home/mwh/Scripts/core/config/" + blid + ".json"
+        self.map_filename = "/home/mwh/Scripts/TileBoard/build/images/" + blid + ".png"
+        try:
+            
+            with open(self.state_filename) as f:
+                last_state = json.load(f)
+            
+            #last_state = load_state_info(self.state_filename)
+            self._last_cleaning_time = last_state['last_cleaning_time']
+            self._last_cleaned_area = last_state['last_cleaned_area']
+            self._positions = last_state['positions']
+        except FileNotFoundError:
+            self._last_cleaning_time = 0
+            self._last_cleaned_area = 0
+            self._positions = []
+            print("No history file found, reinitializing")   
+
         self._last_connect_timestamp = 0
 
     @property
@@ -199,6 +223,7 @@ class IRobotVacuum(IRobotEntity, StateVacuumEntity):
             # Convert to m2 if the unit_system is set to metric
             if self._last_cleaned_area and self.hass.config.units.is_metric:
                 self._last_cleaned_area = round(self._last_cleaned_area * 0.0929)
+            self.save_state = True
         state_attrs[ATTR_CLEANING_TIME] = self._last_cleaning_time
         state_attrs[ATTR_CLEANED_AREA] = self._last_cleaned_area
 
@@ -217,6 +242,16 @@ class IRobotVacuum(IRobotEntity, StateVacuumEntity):
             theta = pos_state.get("theta")
             if all(item is not None for item in [pos_x, pos_y, theta]):
                 position = f"({pos_x}, {pos_y}, {theta})"
+                pos_list = [pos_x, pos_y, theta, time.time()]
+                if len(self._positions) > 1:
+                    if self._positions[-1][0:2] != pos_list[0:2]:
+                        self._positions.append(pos_list)
+                        self.draw_map = True
+                        self.save_state = True
+                else:
+                    self._positions.append(pos_list)
+                    self.draw_map = True
+                    self.save_state = True
             state_attrs[ATTR_POSITION] = position
 
         return state_attrs
@@ -264,7 +299,37 @@ class IRobotVacuum(IRobotEntity, StateVacuumEntity):
             self.vacuum.send_command, command, params
         )
 
+    def age_out_positions(self):
+        while True:
+            if len(self._positions) < 1:
+                return
+            if time.time() - self._positions[0][3] < self.max_age:
+                return
+            self._positions.remove(0)
+
+    def do_save_state(self):
+        #print("Saving roomba state information")
+        state_info = {
+            "last_cleaning_time": self._last_cleaning_time,
+            "last_cleaned_area": self._last_cleaned_area,
+            "positions": self._positions
+        }
+        with open(self.state_filename, "w") as f:
+            json.dump(state_info, f)
+
     def update(self):
+
+        if self.save_state and time.time() - self.last_save > self.io_interval:
+            self.do_save_state()
+            self.last_save = time.time()
+            self.save_state = False
+
+        if self.draw_map and time.time() - self.last_draw > self.io_interval:
+            self.last_draw = time.time()
+            self.draw_map = False
+            draw_map(self._positions, self.map_filename)
+
+        self.age_out_positions()
         if self.vacuum.roomba_connected:
             self._last_connect_timestamp = time.time()
         else:
