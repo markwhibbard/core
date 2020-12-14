@@ -146,13 +146,16 @@ class IRobotVacuum(IRobotEntity, StateVacuumEntity):
         """Initialize the iRobot handler."""
         super().__init__(roomba, blid)
         self._cap_position = self.vacuum_state.get("cap", {}).get("pose") == 1
-        
+
+        self.cache_index = 0
+        self.cached_map = None
         self.save_state = False
         self.last_save = time.time()
         self.draw_map = False
         self.last_draw = time.time()
         self.max_age = 5 * 12 * 3600
-        self.io_interval = 20
+        self.io_interval = 60
+        self.draw_interval = 10
         self.state_filename = "/home/mwh/Scripts/core/config/" + blid + ".json"
         self.map_filename = "/home/mwh/Scripts/TileBoard/build/images/" + blid + ".png"
         try:
@@ -261,9 +264,9 @@ class IRobotVacuum(IRobotEntity, StateVacuumEntity):
         state = json_data.get("state", {}).get("reported", {})
         if self.new_state_filter(state):
             _LOGGER.debug("Got new state from the vacuum: %s", json_data)
-            self.schedule_update_ha_state()
+            self.schedule_update_ha_state(force_refresh=True)
 
-    async def async_start(self):
+    async def async_start(self, **kwargs):
         """Start or resume the cleaning task."""
         if self.state == STATE_PAUSED:
             await self.hass.async_add_executor_job(self.vacuum.send_command, "resume")
@@ -305,7 +308,7 @@ class IRobotVacuum(IRobotEntity, StateVacuumEntity):
                 return
             if time.time() - self._positions[0][3] < self.max_age:
                 return
-            self._positions.remove(0)
+            self._positions.pop(0)
 
     def do_save_state(self):
         #print("Saving roomba state information")
@@ -320,16 +323,24 @@ class IRobotVacuum(IRobotEntity, StateVacuumEntity):
     def update(self):
 
         if self.save_state and time.time() - self.last_save > self.io_interval:
-            self.do_save_state()
             self.last_save = time.time()
+            self.do_save_state()
+            #print("Save took" + str(time.time() - self.last_save))
             self.save_state = False
+            self.cache_index = 0
+            self.cached_map = None
 
-        if self.draw_map and time.time() - self.last_draw > self.io_interval:
+        if self.draw_map and time.time() - self.last_draw > self.draw_interval:
+            #print("Drawing map, elapsed time: " + str(time.time() - self.last_draw))
             self.last_draw = time.time()
             self.draw_map = False
-            draw_map(self._positions, self.map_filename)
+            self.cached_map = draw_map(self._positions, self.map_filename, startindex=self.cache_index, cache=self.cached_map)
+            self.cache_index = len(self._positions) - 1
+            print("Draw took: "  + str(time.time() - self.last_draw))
 
         self.age_out_positions()
+        return
+
         if self.vacuum.roomba_connected:
             self._last_connect_timestamp = time.time()
         else:

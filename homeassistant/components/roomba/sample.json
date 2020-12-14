@@ -1,0 +1,47 @@
+
+{
+    "command": "start",
+    "ordered": 1,
+    "pmap_id": "thfQ-Z5KS5Cx_bkcnsMFdQ",
+    "user_pmapv_id": "200101T213415",
+    "regions": [
+        {
+            "region_id": 1,
+            "type": "rid"
+        }
+    ]
+}
+{
+    "ordered": 1,
+    "pmap_id": "thfQ-Z5KS5Cx_bkcnsMFdQ",
+    "regions": [
+        {
+            "region_id": "5",
+            "type": "rid"
+        },
+        {
+            "region_id": "7",
+            "type": "rid"
+        }
+    ],
+    "user_pmapv_id": "200101T213415",
+    "robot_id": null,
+    "select_all": null
+}
+            {
+                "command": "start",
+                "time": 1607900097,
+                "initiator": "rmtApp",
+                "params": null,
+                "ordered": 1,
+                "pmap_id": "c1E1Ke9USmSTAC-4FgbUmQ",
+                "regions": [
+                    {
+                        "region_id": "2",
+                        "type": "rid"
+                    }
+                ],
+                "user_pmapv_id": "200718T180201"
+            }
+        }
+
