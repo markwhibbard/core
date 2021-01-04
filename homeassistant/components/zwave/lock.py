@@ -367,11 +367,31 @@ class ZwaveLock(ZWaveDeviceEntity, LockEntity):
 
     def lock(self, **kwargs):
         """Lock the device."""
+        #mwh added
+        self._state = "locking"
+        self.maybe_schedule_update()
+        #
         self.values.primary.data = True
 
     def unlock(self, **kwargs):
         """Unlock the device."""
+        #mwh added
+        self._state = "unlocking"
+        self.maybe_schedule_update()
+        #
         self.values.primary.data = False
+
+    #mwh added override
+    @property
+    def state(self):
+        if isinstance(self._state, str):
+            return self._state
+        else:
+            locked = self.is_locked
+            if locked is None:
+                return None
+            return "locked" if locked else "unlocked"
+
 
     @property
     def device_state_attributes(self):
