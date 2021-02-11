@@ -8,7 +8,6 @@ import asyncio
 import datetime
 import enum
 import functools
-from ipaddress import ip_address
 import logging
 import os
 import pathlib
@@ -70,8 +69,12 @@ from homeassistant.exceptions import (
     ServiceNotFound,
     Unauthorized,
 )
-from homeassistant.util import location, network
-from homeassistant.util.async_ import fire_coroutine_threadsafe, run_callback_threadsafe
+from homeassistant.util import location
+from homeassistant.util.async_ import (
+    fire_coroutine_threadsafe,
+    run_callback_threadsafe,
+    shutdown_run_callback_threadsafe,
+)
 import homeassistant.util.dt as dt_util
 from homeassistant.util.timeout import TimeoutManager
 from homeassistant.util.unit_system import IMPERIAL_SYSTEM, METRIC_SYSTEM, UnitSystem
@@ -205,7 +208,7 @@ class CoreState(enum.Enum):
 
     def __str__(self) -> str:  # pylint: disable=invalid-str-returned
         """Return the event."""
-        return self.value  # type: ignore
+        return self.value
 
 
 class HomeAssistant:
@@ -548,6 +551,14 @@ class HomeAssistant:
         # stage 3
         self.state = CoreState.not_running
         self.bus.async_fire(EVENT_HOMEASSISTANT_CLOSE)
+
+        # Prevent run_callback_threadsafe from scheduling any additional
+        # callbacks in the event loop as callbacks created on the futures
+        # it returns will never run after the final `self.async_block_till_done`
+        # which will cause the futures to block forever when waiting for
+        # the `result()` which will cause a deadlock when shutting down the executor.
+        shutdown_run_callback_threadsafe(self.loop)
+
         try:
             async with self.timeout.async_timeout(30):
                 await self.async_block_till_done()
@@ -584,7 +595,7 @@ class EventOrigin(enum.Enum):
 
     def __str__(self) -> str:  # pylint: disable=invalid-str-returned
         """Return the event."""
-        return self.value  # type: ignore
+        return self.value
 
 
 class Event:
@@ -1346,6 +1357,7 @@ class ServiceRegistry:
         blocking: bool = False,
         context: Optional[Context] = None,
         limit: Optional[float] = SERVICE_CALL_LIMIT,
+        target: Optional[Dict] = None,
     ) -> Optional[bool]:
         """
         Call a service.
@@ -1353,7 +1365,9 @@ class ServiceRegistry:
         See description of async_call for details.
         """
         return asyncio.run_coroutine_threadsafe(
-            self.async_call(domain, service, service_data, blocking, context, limit),
+            self.async_call(
+                domain, service, service_data, blocking, context, limit, target
+            ),
             self._hass.loop,
         ).result()
 
@@ -1365,6 +1379,7 @@ class ServiceRegistry:
         blocking: bool = False,
         context: Optional[Context] = None,
         limit: Optional[float] = SERVICE_CALL_LIMIT,
+        target: Optional[Dict] = None,
     ) -> Optional[bool]:
         """
         Call a service.
@@ -1391,6 +1406,9 @@ class ServiceRegistry:
             handler = self._services[domain][service]
         except KeyError:
             raise ServiceNotFound(domain, service) from None
+
+        if target:
+            service_data.update(target)
 
         if handler.schema:
             try:
@@ -1668,39 +1686,7 @@ class Config:
         )
         data = await store.async_load()
 
-        async def migrate_base_url(_: Event) -> None:
-            """Migrate base_url to internal_url/external_url."""
-            if self.hass.config.api is None:
-                return
-
-            base_url = yarl.URL(self.hass.config.api.deprecated_base_url)
-
-            # Check if this is an internal URL
-            if str(base_url.host).endswith(".local") or (
-                network.is_ip_address(str(base_url.host))
-                and network.is_private(ip_address(base_url.host))
-            ):
-                await self.async_update(
-                    internal_url=network.normalize_url(str(base_url))
-                )
-                return
-
-            # External, ensure this is not a loopback address
-            if not (
-                network.is_ip_address(str(base_url.host))
-                and network.is_loopback(ip_address(base_url.host))
-            ):
-                await self.async_update(
-                    external_url=network.normalize_url(str(base_url))
-                )
-
         if data:
-            # Try to migrate base_url to internal_url/external_url
-            if "external_url" not in data:
-                self.hass.bus.async_listen_once(
-                    EVENT_HOMEASSISTANT_START, migrate_base_url
-                )
-
             self._update(
                 source=SOURCE_STORAGE,
                 latitude=data.get("latitude"),

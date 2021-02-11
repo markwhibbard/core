@@ -1,5 +1,5 @@
 """Provide a way to connect devices to one physical location."""
-from asyncio import Event, gather
+from asyncio import gather
 from collections import OrderedDict
 from typing import Container, Dict, Iterable, List, MutableMapping, Optional, cast
 
@@ -10,6 +10,8 @@ from homeassistant.loader import bind_hass
 from homeassistant.util import slugify
 
 from .typing import HomeAssistantType
+
+# mypy: disallow-any-generics
 
 DATA_REGISTRY = "area_registry"
 EVENT_AREA_REGISTRY_UPDATED = "area_registry_updated"
@@ -25,7 +27,7 @@ class AreaEntry:
     name: str = attr.ib()
     id: Optional[str] = attr.ib(default=None)
 
-    def generate_id(self, existing_ids: Container) -> None:
+    def generate_id(self, existing_ids: Container[str]) -> None:
         """Initialize ID."""
         suggestion = suggestion_base = slugify(self.name)
         tries = 1
@@ -152,24 +154,23 @@ class AreaRegistry:
         return data
 
 
+@callback
+def async_get(hass: HomeAssistantType) -> AreaRegistry:
+    """Get area registry."""
+    return cast(AreaRegistry, hass.data[DATA_REGISTRY])
+
+
+async def async_load(hass: HomeAssistantType) -> None:
+    """Load area registry."""
+    assert DATA_REGISTRY not in hass.data
+    hass.data[DATA_REGISTRY] = AreaRegistry(hass)
+    await hass.data[DATA_REGISTRY].async_load()
+
+
 @bind_hass
 async def async_get_registry(hass: HomeAssistantType) -> AreaRegistry:
-    """Return area registry instance."""
-    reg_or_evt = hass.data.get(DATA_REGISTRY)
+    """Get area registry.
 
-    if not reg_or_evt:
-        evt = hass.data[DATA_REGISTRY] = Event()
-
-        reg = AreaRegistry(hass)
-        await reg.async_load()
-
-        hass.data[DATA_REGISTRY] = reg
-        evt.set()
-        return reg
-
-    if isinstance(reg_or_evt, Event):
-        evt = reg_or_evt
-        await evt.wait()
-        return cast(AreaRegistry, hass.data.get(DATA_REGISTRY))
-
-    return cast(AreaRegistry, reg_or_evt)
+    This is deprecated and will be removed in the future. Use async_get instead.
+    """
+    return async_get(hass)
