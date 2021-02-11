@@ -44,9 +44,12 @@ class LutronCasetaFan(LutronCasetaDevice, FanEntity):
     @property
     def percentage(self) -> str:
         """Return the current speed percentage."""
-        return ordered_list_item_to_percentage(
-            ORDERED_NAMED_FAN_SPEEDS, self._device["fan_speed"]
-        )
+        if self._device["fan_speed"] != "Off":
+            return ordered_list_item_to_percentage(
+                ORDERED_NAMED_FAN_SPEEDS, self._device["fan_speed"]
+            )
+        else:
+            return 0
 
     @property
     def supported_features(self) -> int:

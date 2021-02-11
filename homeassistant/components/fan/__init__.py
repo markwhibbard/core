@@ -48,6 +48,7 @@ SPEED_OFF = "off"
 SPEED_LOW = "low"
 SPEED_MEDIUM = "medium"
 SPEED_HIGH = "high"
+SPEED_VERY_HIGH = "very high"
 
 DIRECTION_FORWARD = "forward"
 DIRECTION_REVERSE = "reverse"
@@ -87,7 +88,7 @@ _FAN_NATIVE = "_fan_native"
 
 OFF_SPEED_VALUES = [SPEED_OFF, None]
 
-LEGACY_SPEED_LIST = [SPEED_LOW, SPEED_MEDIUM, SPEED_HIGH]
+LEGACY_SPEED_LIST = [SPEED_LOW, SPEED_MEDIUM, SPEED_HIGH, SPEED_VERY_HIGH]
 
 
 class NoValidSpeedsError(ValueError):
