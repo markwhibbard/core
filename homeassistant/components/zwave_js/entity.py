@@ -1,28 +1,21 @@
 """Generic Z-Wave Entity Class."""
 
 import logging
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 from zwave_js_server.client import Client as ZwaveClient
-from zwave_js_server.model.node import Node as ZwaveNode
 from zwave_js_server.model.value import Value as ZwaveValue, get_value_id
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import callback
 from homeassistant.helpers.entity import Entity
 
-from .const import DOMAIN
 from .discovery import ZwaveDiscoveryInfo
+from .helpers import get_device_id
 
 LOGGER = logging.getLogger(__name__)
 
 EVENT_VALUE_UPDATED = "value updated"
-
-
-@callback
-def get_device_id(client: ZwaveClient, node: ZwaveNode) -> Tuple[str, str]:
-    """Get device registry identifier for Z-Wave node."""
-    return (DOMAIN, f"{client.driver.controller.home_id}-{node.node_id}")
 
 
 class ZWaveBaseEntity(Entity):
@@ -134,6 +127,7 @@ class ZWaveBaseEntity(Entity):
         value_property: Union[str, int],
         command_class: Optional[int] = None,
         endpoint: Optional[int] = None,
+        value_property_key: Optional[int] = None,
         value_property_key_name: Optional[str] = None,
         add_to_watched_value_ids: bool = True,
         check_all_endpoints: bool = False,
@@ -146,16 +140,14 @@ class ZWaveBaseEntity(Entity):
         if endpoint is None:
             endpoint = self.info.primary_value.endpoint
 
-        # Build partial event data dictionary so we can change the endpoint later
-        partial_evt_data = {
-            "commandClass": command_class,
-            "property": value_property,
-            "propertyKeyName": value_property_key_name,
-        }
-
         # lookup value by value_id
         value_id = get_value_id(
-            self.info.node, {**partial_evt_data, "endpoint": endpoint}
+            self.info.node,
+            command_class,
+            value_property,
+            endpoint=endpoint,
+            property_key=value_property_key,
+            property_key_name=value_property_key_name,
         )
         return_value = self.info.node.values.get(value_id)
 
@@ -166,7 +158,11 @@ class ZWaveBaseEntity(Entity):
                 if endpoint_.index != self.info.primary_value.endpoint:
                     value_id = get_value_id(
                         self.info.node,
-                        {**partial_evt_data, "endpoint": endpoint_.index},
+                        command_class,
+                        value_property,
+                        endpoint=endpoint_.index,
+                        property_key=value_property_key,
+                        property_key_name=value_property_key_name,
                     )
                     return_value = self.info.node.values.get(value_id)
                     if return_value:
